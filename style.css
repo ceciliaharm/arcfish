@@ -1,0 +1,185 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: linear-gradient(180deg, #0a192f 0%, #112240 100%);
+  color: #e6f1ff;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+header h1 {
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+  color: #64ffda;
+}
+
+header p {
+  opacity: 0.8;
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+}
+
+.wallet-section {
+  margin-bottom: 16px;
+}
+
+#connectBtn {
+  background: #7c3aed;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.wallet-info {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-around;
+  background: rgba(100, 255, 218, 0.1);
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.game-area {
+  position: relative;
+  height: 300px;
+  background: linear-gradient(to bottom, #1e3a5f 0%, #0d1b2a 100%);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 3px solid #64ffda;
+  margin-bottom: 16px;
+}
+
+.water {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 70%;
+  background: linear-gradient(to bottom, #0077b6, #023e8a);
+  opacity: 0.7;
+}
+
+.boat {
+  position: absolute;
+  top: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2.3rem;
+  z-index: 10;
+}
+
+.hook {
+  position: absolute;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.7rem;
+  transition: top 0.8s ease;
+  z-index: 5;
+}
+
+.fish {
+  position: absolute;
+  font-size: 1.7rem;
+  animation: swim 3.5s linear infinite;
+  cursor: pointer;
+}
+
+@keyframes swim {
+  0% { transform: translateX(-60px); }
+  100% { transform: translateX(110vw); }
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+button {
+  padding: 11px 18px;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+#castBtn {
+  background: #64ffda;
+  color: #0a192f;
+}
+
+#castBtn:disabled,
+#claimBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+#claimBtn {
+  background: #ffd166;
+  color: #0a192f;
+}
+
+.faucet-box {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(100, 255, 218, 0.3);
+}
+
+.faucet-btn {
+  display: inline-block;
+  margin: 10px 0;
+  padding: 11px 22px;
+  background: #00b4d8;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.note {
+  font-size: 0.82rem;
+  opacity: 0.7;
+  margin-top: 6px;
+}
+
+.message, .tx-status {
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-height: 20px;
+}
+
+.success { background: rgba(100, 255, 218, 0.2); color: #64ffda; }
+.error { background: rgba(255, 100, 100, 0.2); color: #ff6b6b; }
+.pending { background: rgba(255, 209, 102, 0.2); color: #ffd166; }

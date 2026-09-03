@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ArcFish | On-Chain Fishing on Arc Testnet</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎣 ArcFish</h1>
+      <p>On-Chain Fishing Game on Arc Testnet — Every action requires a real transaction</p>
+    </header>
+
+    <div class="wallet-section">
+      <button id="connectBtn">Connect Wallet</button>
+      <div id="walletInfo" class="wallet-info">Not connected</div>
+    </div>
+
+    <div class="stats">
+      <div>Score: <span id="score">0</span></div>
+      <div>Fish Caught: <span id="fishCount">0</span></div>
+      <div>Virtual Reward: <span id="reward">0 USDC</span></div>
+    </div>
+
+    <div class="game-area" id="gameArea">
+      <div class="water"></div>
+      <div class="boat">🚤</div>
+      <div class="hook" id="hook">🪝</div>
+    </div>
+
+    <div class="controls">
+      <button id="castBtn" disabled>Cast Line (Tx Required)</button>
+      <button id="claimBtn" disabled>Claim Reward (Tx Required)</button>
+    </div>
+
+    <div class="faucet-box">
+      <h3>💧 Get Testnet USDC First</h3>
+      <a href="https://faucet.circle.com" target="_blank" class="faucet-btn">
+        Open Circle Faucet (Arc Testnet)
+      </a>
+      <p class="note">
+        Network: Arc Testnet | Chain ID: 5042002<br>
+        RPC: https://rpc.testnet.arc.network
+      </p>
+    </div>
+
+    <div id="message" class="message"></div>
+    <div id="txStatus" class="tx-status"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
