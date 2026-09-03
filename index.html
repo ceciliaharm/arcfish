@@ -5,72 +5,139 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ArcFish | On-Chain Fishing</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 </head>
 <body>
   <div class="bg-glow"></div>
 
-  <div class="container">
-    <header>
+  <!-- START SCREEN -->
+  <div id="startScreen" class="start-screen">
+    <div class="start-card">
       <div class="logo">🎣 ArcFish</div>
       <p class="tagline">On-Chain Fishing on Arc Testnet</p>
-    </header>
 
-    <div class="wallet-section">
-      <button id="connectBtn" class="btn-connect">Connect Wallet</button>
-      <div id="walletInfo" class="wallet-info">Not connected</div>
-    </div>
-
-    <div class="stats-bar">
-      <div class="stat-item">
-        <span class="stat-label">Score</span>
-        <span id="score" class="stat-value">0</span>
+      <div id="stepUsername">
+        <h3>Masukkan Username</h3>
+        <input type="text" id="usernameInput" placeholder="Username (3-16 karakter)" maxlength="16" />
+        <button id="nextToCharacter" class="btn-primary">Lanjut</button>
+        <p class="note">Username hanya bisa diisi sekali</p>
       </div>
-      <div class="stat-item">
-        <span class="stat-label">Fish</span>
-        <span id="fishCount" class="stat-value">0</span>
+
+      <div id="stepCharacter" class="hidden">
+        <h3>Pilih Karakter</h3>
+        <div class="character-select">
+          <div class="char-option" data-char="male">
+            <div class="char-emoji">👨‍✈️</div>
+            <div>Pria</div>
+          </div>
+          <div class="char-option" data-char="female">
+            <div class="char-emoji">👩‍✈️</div>
+            <div>Wanita</div>
+          </div>
+        </div>
+        <button id="startGameBtn" class="btn-primary" disabled>Mulai Memancing</button>
       </div>
-      <div class="stat-item">
-        <span class="stat-label">Reward</span>
-        <span id="reward" class="stat-value">0 USDC</span>
-      </div>
     </div>
-
-    <div class="game-area" id="gameArea">
-      <div class="sky"></div>
-      <div class="water">
-        <div class="wave wave1"></div>
-        <div class="wave wave2"></div>
-      </div>
-      <div class="boat">🚤</div>
-      <div class="hook" id="hook">🪝</div>
-      <div id="particles"></div>
-    </div>
-
-    <div class="controls">
-      <button id="castBtn" class="btn-primary" disabled>🎣 Cast Line (On-Chain)</button>
-      <button id="reelBtn" class="btn-reel" disabled>↑ Reel In</button>
-    </div>
-
-    <div class="controls" style="margin-top: -8px;">
-      <button id="claimBtn" class="btn-secondary" disabled>💰 Claim Reward</button>
-    </div>
-
-    <div class="faucet-card">
-      <h3>💧 Need Testnet USDC?</h3>
-      <a href="https://faucet.circle.com" target="_blank" class="btn-faucet">
-        Open Circle Faucet
-      </a>
-      <p class="network-info">Arc Testnet • Chain ID 5042002</p>
-    </div>
-
-    <div id="message" class="message"></div>
-    <div id="txStatus" class="tx-status"></div>
   </div>
 
-  <!-- Catch Popup -->
+  <!-- MAIN GAME -->
+  <div id="gameWrapper" class="main-wrapper hidden">
+    <div class="game-panel">
+      <header>
+        <div class="logo">🎣 ArcFish</div>
+        <p class="tagline">On-Chain Fishing on Arc Testnet</p>
+      </header>
+
+      <div class="player-info">
+        <span id="displayUsername">Player</span> • 
+        <span id="displayCharacter">👨‍✈️</span>
+      </div>
+
+      <div class="wallet-section">
+        <button id="connectBtn" class="btn-connect">Connect Wallet</button>
+        <div id="walletInfo" class="wallet-info">Not connected</div>
+      </div>
+
+      <div class="stats-bar">
+        <div class="stat-item">
+          <span class="stat-label">Score</span>
+          <span id="score" class="stat-value">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Fish</span>
+          <span id="fishCount" class="stat-value">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Reward</span>
+          <span id="reward" class="stat-value">0 USDC</span>
+        </div>
+      </div>
+
+      <div class="game-area" id="gameArea">
+        <div class="sky"></div>
+        
+        <!-- Boat + Character -->
+        <div class="boat-container">
+          <div class="character" id="playerCharacter">👨‍✈️</div>
+          <div class="boat">🚢</div>
+        </div>
+
+        <div class="hook" id="hook">🪝</div>
+
+        <!-- Underwater scenery -->
+        <div class="water">
+          <div class="wave wave1"></div>
+          <div class="wave wave2"></div>
+          
+          <!-- Coral & decoration -->
+          <div class="coral coral1">🪸</div>
+          <div class="coral coral2">🪨</div>
+          <div class="coral coral3">🌿</div>
+          <div class="coral coral4">🪸</div>
+          <div class="coral coral5">🐚</div>
+          <div class="seaweed sw1">🌱</div>
+          <div class="seaweed sw2">🌿</div>
+          <div class="seaweed sw3">🌱</div>
+        </div>
+
+        <div id="particles"></div>
+        <div id="struggleFish" class="struggle-fish hidden"></div>
+      </div>
+
+      <div class="controls">
+        <button id="castBtn" class="btn-primary" disabled>🎣 Cast Line (On-Chain)</button>
+        <button id="reelBtn" class="btn-reel" disabled>↑ Reel In</button>
+      </div>
+
+      <div class="controls">
+        <button id="claimBtn" class="btn-secondary" disabled>💰 Claim Reward</button>
+      </div>
+
+      <div class="faucet-card">
+        <h3>💧 Need Testnet USDC?</h3>
+        <a href="https://faucet.circle.com" target="_blank" class="btn-faucet">Open Circle Faucet</a>
+        <p class="network-info">Arc Testnet • Chain ID 5042002</p>
+      </div>
+
+      <div id="message" class="message"></div>
+      <div id="txStatus" class="tx-status"></div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="leaderboard-panel">
+      <div class="leaderboard-card">
+        <h2>🏆 Leaderboard</h2>
+        <p class="lb-subtitle">Top 10 Players</p>
+        <div class="leaderboard-list" id="leaderboardList">
+          <div class="lb-empty">No scores yet</div>
+        </div>
+        <button id="saveScoreBtn" class="btn-save">Save Current Score</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Catch Modal -->
   <div id="catchModal" class="modal hidden">
     <div class="modal-content">
       <div class="catch-emoji" id="catchEmoji">🐟</div>
