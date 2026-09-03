@@ -50,7 +50,11 @@
     </div>
 
     <div class="controls">
-      <button id="castBtn" class="btn-primary" disabled>🎣 Cast Line</button>
+      <button id="castBtn" class="btn-primary" disabled>🎣 Cast Line (On-Chain)</button>
+      <button id="reelBtn" class="btn-reel" disabled>↑ Reel In</button>
+    </div>
+
+    <div class="controls" style="margin-top: -8px;">
       <button id="claimBtn" class="btn-secondary" disabled>💰 Claim Reward</button>
     </div>
 
@@ -64,6 +68,17 @@
 
     <div id="message" class="message"></div>
     <div id="txStatus" class="tx-status"></div>
+  </div>
+
+  <!-- Catch Popup -->
+  <div id="catchModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="catch-emoji" id="catchEmoji">🐟</div>
+      <div class="catch-name" id="catchName">Fish Name</div>
+      <div class="catch-points" id="catchPoints">+0 points</div>
+      <div class="catch-reward" id="catchReward">+0 USDC</div>
+      <button id="closeModal" class="btn-close">Nice!</button>
+    </div>
   </div>
 
   <script src="script.js"></script>
