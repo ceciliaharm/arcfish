@@ -3,11 +3,21 @@ const ARC_RPC = "https://rpc.testnet.arc.network";
 const ARC_EXPLORER = "https://testnet.arcscan.app";
 
 let provider, signer, userAddress;
-let score = 0;
-let fishCount = 0;
-let virtualReward = 0;
-let isCasting = false;
-let isProcessingTx = false;
+let score = 0, fishCount = 0, virtualReward = 0;
+let isCasting = false, isProcessingTx = false;
+let currentUsername = localStorage.getItem("arcfish_username") || "";
+let currentCharacter = localStorage.getItem("arcfish_character") || "";
+
+const startScreen = document.getElementById("startScreen");
+const gameWrapper = document.getElementById("gameWrapper");
+const stepUsername = document.getElementById("stepUsername");
+const stepCharacter = document.getElementById("stepCharacter");
+const usernameInput = document.getElementById("usernameInput");
+const nextToCharacter = document.getElementById("nextToCharacter");
+const startGameBtn = document.getElementById("startGameBtn");
+const playerCharacter = document.getElementById("playerCharacter");
+const displayUsername = document.getElementById("displayUsername");
+const displayCharacter = document.getElementById("displayCharacter");
 
 const connectBtn = document.getElementById("connectBtn");
 const castBtn = document.getElementById("castBtn");
@@ -21,7 +31,9 @@ const messageEl = document.getElementById("message");
 const txStatus = document.getElementById("txStatus");
 const hook = document.getElementById("hook");
 const gameArea = document.getElementById("gameArea");
-const particlesContainer = document.getElementById("particles");
+const struggleFish = document.getElementById("struggleFish");
+const saveScoreBtn = document.getElementById("saveScoreBtn");
+const leaderboardList = document.getElementById("leaderboardList");
 
 const catchModal = document.getElementById("catchModal");
 const catchEmoji = document.getElementById("catchEmoji");
@@ -30,7 +42,6 @@ const catchPoints = document.getElementById("catchPoints");
 const catchReward = document.getElementById("catchReward");
 const closeModal = document.getElementById("closeModal");
 
-// 30 jenis ikan
 const fishTypes = [
   { emoji: "🐟", name: "Blue Fish", points: 10, reward: 0.3 },
   { emoji: "🐠", name: "Clownfish", points: 15, reward: 0.4 },
@@ -64,16 +75,61 @@ const fishTypes = [
   { emoji: "🌀", name: "Vortex Fish", points: 110, reward: 2.8 }
 ];
 
+let selectedChar = "";
+
+// ===== START FLOW =====
+if (currentUsername && currentCharacter) {
+  // Sudah pernah set → langsung masuk game
+  startScreen.classList.add("hidden");
+  gameWrapper.classList.remove("hidden");
+  applyPlayerData();
+} 
+
+nextToCharacter.addEventListener("click", () => {
+  const name = usernameInput.value.trim();
+  if (name.length < 3) {
+    alert("Username minimal 3 karakter");
+    return;
+  }
+  currentUsername = name;
+  localStorage.setItem("arcfish_username", name);
+  stepUsername.classList.add("hidden");
+  stepCharacter.classList.remove("hidden");
+});
+
+document.querySelectorAll(".char-option").forEach(opt => {
+  opt.addEventListener("click", () => {
+    document.querySelectorAll(".char-option").forEach(o => o.classList.remove("selected"));
+    opt.classList.add("selected");
+    selectedChar = opt.dataset.char;
+    startGameBtn.disabled = false;
+  });
+});
+
+startGameBtn.addEventListener("click", () => {
+  currentCharacter = selectedChar;
+  localStorage.setItem("arcfish_character", selectedChar);
+  startScreen.classList.add("hidden");
+  gameWrapper.classList.remove("hidden");
+  applyPlayerData();
+});
+
+function applyPlayerData() {
+  displayUsername.textContent = currentUsername;
+  const emoji = currentCharacter === "female" ? "👩‍✈️" : "👨‍✈️";
+  displayCharacter.textContent = emoji;
+  playerCharacter.textContent = emoji;
+}
+
+// ===== HELPERS =====
 function showMessage(text, type = "success") {
   messageEl.textContent = text;
   messageEl.className = `message ${type}`;
 }
-
 function showTxStatus(text, type = "pending") {
   txStatus.textContent = text;
   txStatus.className = `tx-status ${type}`;
 }
-
 function showCatchPopup(fish) {
   catchEmoji.textContent = fish.emoji;
   catchName.textContent = fish.name;
@@ -81,34 +137,89 @@ function showCatchPopup(fish) {
   catchReward.textContent = `+${fish.reward} USDC`;
   catchModal.classList.remove("hidden");
 }
+closeModal.addEventListener("click", () => catchModal.classList.add("hidden"));
 
-closeModal.addEventListener("click", () => {
-  catchModal.classList.add("hidden");
-});
+// ===== CATCH WITH STRUGGLE =====
+function catchWithStruggle(fish) {
+  // Tampilkan ikan bergeliat di air
+  struggleFish.textContent = fish.emoji;
+  struggleFish.classList.remove("hidden");
+  struggleFish.classList.add("fighting");
+  struggleFish.style.top = "65%";
 
-function createParticles(x, y) {
-  for (let i = 0; i < 14; i++) {
-    const p = document.createElement("div");
-    p.className = "particle";
-    p.style.left = x + "px";
-    p.style.top = y + "px";
-    const angle = Math.random() * Math.PI * 2;
-    const distance = 50 + Math.random() * 70;
-    p.style.setProperty("--tx", Math.cos(angle) * distance + "px");
-    p.style.setProperty("--ty", Math.sin(angle) * distance + "px");
-    particlesContainer.appendChild(p);
-    setTimeout(() => p.remove(), 800);
-  }
+  showMessage("Ikan melawan! Sedang bergeliat memakan umpan...");
+
+  // Setelah 1.8 detik, tarik ke permukaan
+  setTimeout(() => {
+    struggleFish.style.top = "35%";
+    struggleFish.classList.remove("fighting");
+  }, 1800);
+
+  // Setelah sampai permukaan, tampilkan popup
+  setTimeout(() => {
+    struggleFish.classList.add("hidden");
+    
+    score += fish.points;
+    fishCount += 1;
+    virtualReward += fish.reward;
+
+    scoreEl.textContent = score;
+    fishCountEl.textContent = fishCount;
+    rewardEl.textContent = `${virtualReward.toFixed(1)} USDC`;
+
+    showCatchPopup(fish);
+    if (virtualReward >= 3) claimBtn.disabled = false;
+  }, 2800);
 }
 
+function catchRandomFish() {
+  const type = fishTypes[Math.floor(Math.random() * fishTypes.length)];
+  catchWithStruggle(type);
+}
+
+// ===== LEADERBOARD =====
+function getLeaderboard() {
+  return JSON.parse(localStorage.getItem("arcfish_leaderboard") || "[]");
+}
+function renderLeaderboard() {
+  const board = getLeaderboard();
+  if (board.length === 0) {
+    leaderboardList.innerHTML = `<div class="lb-empty">No scores yet</div>`;
+    return;
+  }
+  leaderboardList.innerHTML = board.map((p, i) => `
+    <div class="lb-item">
+      <div class="lb-rank">#${i+1}</div>
+      <div class="lb-name">${p.name}</div>
+      <div class="lb-score">${p.score}</div>
+    </div>
+  `).join("");
+}
+saveScoreBtn.addEventListener("click", () => {
+  if (!currentUsername || score === 0) return;
+  let board = getLeaderboard();
+  const exist = board.find(p => p.name === currentUsername);
+  if (exist) {
+    if (score > exist.score) exist.score = score;
+  } else {
+    board.push({ name: currentUsername, score });
+  }
+  board.sort((a,b) => b.score - a.score);
+  board = board.slice(0, 10);
+  localStorage.setItem("arcfish_leaderboard", JSON.stringify(board));
+  renderLeaderboard();
+  showMessage("Score saved!", "success");
+});
+
+// ===== WALLET & TX =====
 async function switchToArcNetwork() {
   try {
     await window.ethereum.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: "0x" + ARC_CHAIN_ID.toString(16) }],
     });
-  } catch (switchError) {
-    if (switchError.code === 4902) {
+  } catch (e) {
+    if (e.code === 4902) {
       await window.ethereum.request({
         method: "wallet_addEthereumChain",
         params: [{
@@ -119,70 +230,46 @@ async function switchToArcNetwork() {
           blockExplorerUrls: [ARC_EXPLORER],
         }],
       });
-    } else {
-      throw switchError;
-    }
+    } else throw e;
   }
 }
 
 async function connectWallet() {
-  if (!window.ethereum) {
-    showMessage("Please install MetaMask!", "error");
-    return;
-  }
-
+  if (!window.ethereum) return showMessage("Install MetaMask!", "error");
   try {
-    showTxStatus("Connecting wallet...", "pending");
+    showTxStatus("Connecting...", "pending");
     await switchToArcNetwork();
-
     provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
     signer = provider.getSigner();
     userAddress = await signer.getAddress();
-
-    walletInfo.textContent = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+    walletInfo.textContent = `${userAddress.slice(0,6)}...${userAddress.slice(-4)}`;
     connectBtn.textContent = "Connected ✓";
     connectBtn.disabled = true;
     castBtn.disabled = false;
-
-    showMessage("Connected to Arc Testnet!", "success");
+    showMessage("Connected!", "success");
     showTxStatus("");
-  } catch (err) {
-    showMessage("Failed to connect wallet", "error");
+  } catch (e) {
+    showMessage("Gagal connect", "error");
     showTxStatus("");
   }
 }
 
-// Hanya Cast Line yang pakai transaksi on-chain
 async function sendCastTransaction() {
-  if (isProcessingTx) return false;
-  if (!signer) {
-    showMessage("Connect wallet first!", "error");
-    return false;
-  }
-
+  if (isProcessingTx || !signer) return false;
   isProcessingTx = true;
   castBtn.disabled = true;
-
   try {
-    showTxStatus("Sending Cast Line transaction... Confirm in MetaMask", "pending");
-
-    const tx = await signer.sendTransaction({
-      to: userAddress,
-      value: 0,
-      gasLimit: 100000
-    });
-
-    showTxStatus(`Waiting confirmation... ${tx.hash.slice(0, 10)}...`, "pending");
+    showTxStatus("Sending Cast Line... Confirm in MetaMask", "pending");
+    const tx = await signer.sendTransaction({ to: userAddress, value: 0, gasLimit: 100000 });
+    showTxStatus(`Waiting... ${tx.hash.slice(0,10)}...`, "pending");
     await tx.wait();
-
-    showTxStatus("✅ Cast Line confirmed on Arc Testnet!", "success");
+    showTxStatus("✅ Confirmed!", "success");
     isProcessingTx = false;
     return true;
-
-  } catch (err) {
-    showTxStatus("Transaction failed or rejected", "error");
-    showMessage(err.reason || err.message || "Rejected", "error");
+  } catch (e) {
+    showTxStatus("Failed", "error");
+    showMessage(e.reason || e.message || "Rejected", "error");
     isProcessingTx = false;
     castBtn.disabled = false;
     return false;
@@ -190,97 +277,69 @@ async function sendCastTransaction() {
 }
 
 function spawnFish() {
-  const fishEl = document.createElement("div");
-  fishEl.className = "fish";
-
+  const el = document.createElement("div");
+  el.className = "fish";
   const type = fishTypes[Math.floor(Math.random() * fishTypes.length)];
-  fishEl.textContent = type.emoji;
+  el.textContent = type.emoji;
+  el.style.top = `${160 + Math.random() * 180}px`;
+  el.style.left = "-100px";
+  const dur = 9 + Math.random() * 4;
+  el.style.animationDuration = dur + "s";
 
-  const top = 150 + Math.random() * 160;
-  fishEl.style.top = `${top}px`;
-  fishEl.style.left = "-100px";
-
-  // Lebih lambat = lebih mudah diklik
-  const duration = 8 + Math.random() * 5;
-  fishEl.style.animationDuration = `${duration}s`;
-
-  // Klik ikan = tangkap (TIDAK pakai transaksi)
-  fishEl.addEventListener("click", () => {
+  el.addEventListener("click", () => {
     if (!isCasting) return;
-
-    // Particles
-    const rect = fishEl.getBoundingClientRect();
-    const areaRect = gameArea.getBoundingClientRect();
-    createParticles(rect.left - areaRect.left + 20, rect.top - areaRect.top + 20);
-
-    // Update score (lokal)
-    score += type.points;
-    fishCount += 1;
-    virtualReward += type.reward;
-
-    scoreEl.textContent = score;
-    fishCountEl.textContent = fishCount;
-    rewardEl.textContent = `${virtualReward.toFixed(1)} USDC`;
-
-    fishEl.remove();
-    showCatchPopup(type);
-
-    if (virtualReward >= 3) claimBtn.disabled = false;
+    el.remove();
+    catchWithStruggle(type);
   });
 
-  gameArea.appendChild(fishEl);
-
-  setTimeout(() => {
-    if (fishEl.parentNode) fishEl.remove();
-  }, duration * 1000);
+  gameArea.appendChild(el);
+  setTimeout(() => el.remove(), dur * 1000);
 }
 
-// CAST LINE (On-Chain)
+// CAST
 castBtn.addEventListener("click", async () => {
   if (isCasting || isProcessingTx) return;
-
-  const success = await sendCastTransaction();
-  if (!success) return;
+  const ok = await sendCastTransaction();
+  if (!ok) return;
 
   isCasting = true;
   castBtn.disabled = true;
   reelBtn.disabled = false;
+  hook.style.top = "75%";
+  showMessage("Line cast!");
 
-  hook.style.top = "70%";
-  showMessage("Line cast! Click the fish to catch them!");
+  // Selalu dapat ikan + struggle
+  setTimeout(() => catchRandomFish(), 800);
+  if (Math.random() > 0.4) setTimeout(() => catchRandomFish(), 3200);
 
-  // Spawn banyak ikan
-  for (let i = 0; i < 10; i++) {
-    setTimeout(spawnFish, i * 450);
+  for (let i = 0; i < 7; i++) {
+    setTimeout(spawnFish, 1000 + i * 600);
   }
 });
 
-// REEL IN (Tidak pakai transaksi)
+// REEL
 reelBtn.addEventListener("click", () => {
   if (!isCasting) return;
-
-  hook.style.top = "26%";
+  hook.style.top = "32%";
   isCasting = false;
   reelBtn.disabled = true;
   castBtn.disabled = false;
-
-  // Hapus semua ikan yang tersisa
   document.querySelectorAll(".fish").forEach(f => f.remove());
-
+  struggleFish.classList.add("hidden");
   showMessage("Line reeled in!");
 });
 
-// CLAIM (Tidak pakai transaksi)
+// CLAIM
 claimBtn.addEventListener("click", () => {
   if (virtualReward < 3) return;
-
-  showMessage(`Successfully claimed ${virtualReward.toFixed(1)} USDC virtual reward!`);
+  showMessage(`Claimed ${virtualReward.toFixed(1)} USDC virtual!`);
   virtualReward = 0;
   rewardEl.textContent = "0 USDC";
   claimBtn.disabled = true;
 });
 
 connectBtn.addEventListener("click", connectWallet);
+renderLeaderboard();
 
 if (window.ethereum) {
   window.ethereum.on("accountsChanged", () => location.reload());
