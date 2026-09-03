@@ -106,16 +106,14 @@ async function sendGameTransaction(actionName) {
   try {
     showTxStatus(`Sending "${actionName}" transaction... Confirm in MetaMask`, "pending");
 
-    const data = ethers.utils.formatBytes32String(actionName + "-" + Date.now());
-
+    // Perbaikan: Tidak pakai "data" supaya tidak error di Arc Testnet
     const tx = await signer.sendTransaction({
-      to: userAddress,
-      value: 0,
-      data: data,
-      gasLimit: 100000,
+      to: userAddress,     // kirim ke diri sendiri
+      value: 0,            // 0 USDC
+      gasLimit: 100000
     });
 
-    showTxStatus(`Transaction sent! Waiting confirmation... Hash: ${tx.hash.slice(0, 10)}...`, "pending");
+    showTxStatus(`Transaction sent! Waiting confirmation... ${tx.hash.slice(0, 10)}...`, "pending");
 
     await tx.wait();
 
